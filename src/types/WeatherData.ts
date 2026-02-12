@@ -18,6 +18,20 @@ type CurrentWeather = {
     weathercode: number;
 }
 
+/*
+weather codes mapping
+0: Clear sky
+1: Mainly clear
+2: Partly cloudy
+3: Overcast
+4: Fog and depositing rime fog
+5: Light drizzle
+6: Moderate drizzle
+7: Dense drizzle
+8: Light freezing drizzle
+*/
+
+
 export type WeatherData = {
     latitude: number;
     longitude: number;
