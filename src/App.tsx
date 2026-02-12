@@ -1,36 +1,50 @@
-import { useEffect } from 'react';
 import Header from './Components/Header';
-import type { cityDataApiResponse } from './types/CityData';
-import type { WeatherData } from './types/WeatherData';
 import SearchCity from './Components/SearchCity';
-
-
+import { useState, useEffect } from 'react';
+import type { CityData } from './types/CityData';
+import WeatherCard from './Components/WeatherCard';
 
 function App() {
+const [cities, setCities] = useState<CityData[]>([]);
 
-  useEffect(()=>{
-  const fetchCityData = async () => {
-    const response = await fetch('https://geocoding-api.open-meteo.com/v1/search?name=istanbul');
-    const data: cityDataApiResponse = await response.json();
-    console.log(data.results[1].name);
-  }
-  fetchCityData();
-  })
-  //https://api.open-meteo.com/v1/forecast?latitude=51.50853&longitude=-0.12574&current_weather=true
+// Update all cities' updatedAt to trigger weather refresh
+useEffect(() => {
+  if (cities.length === 0) return;
+  
+  const interval = setInterval(() => {
+    setCities(prev => 
+      prev.map(city => ({
+        ...city,
+        updatedAt: new Date()
+      }))
+    );
+  }, 15000);
+  
+  return () => clearInterval(interval);
+}, [cities.length]);
 
-useEffect(()=>{
-  const fetchWeatherData = async () => {
-    const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=51.50853&longitude=-0.12574&current_weather=true');
-    const data: WeatherData = await response.json();
-    console.log(data.current_weather.temperature);
-  }
-  fetchWeatherData();
-})
+const handleAddCity = (city: CityData) => {
+  setCities(prev => {
+    // Check if city already exists
+    if (prev.some(c => c.id === city.id)) {
+      return prev; // Don't add duplicate
+    }
+    return [...prev, { ...city, updatedAt: new Date() }];
+  });
+}
 
+const handleRemoveCity = (id: number) => {
+  setCities(prev => prev.filter(city => city.id !== id));
+}
   return (
     <div className="flex flex-col gap-4 p-8">
       <Header />
-      <SearchCity />
+      <SearchCity handleAddCity={handleAddCity}/>
+     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {cities.map((city) => (
+            <WeatherCard key={city.id} city={city} handleRemoveCity={handleRemoveCity} />
+          ))}
+     </div>
     </div>
   )
 }

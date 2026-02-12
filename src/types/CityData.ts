@@ -14,6 +14,7 @@ export type CityData = {
     country_id: number;
     country: string;
     admin1: string;
+    updatedAt?: Date; // Added by app for refresh tracking
 }
 
 export type cityDataApiResponse = {
